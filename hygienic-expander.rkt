@@ -135,7 +135,7 @@
     [(? identifier? id)
      (or (resolve id BINDING-STORE)
          (error 'expander "unbound identifier: ~a" id))]
-    [(? number?) s]
+    [(or (? number?) #true #false) s]
     [(cons (? identifier? id) _)
      (match* ((resolve id BINDING-STORE) s)
        [(#f _) (error 'expander "unbound identifier: ~a" id)]
