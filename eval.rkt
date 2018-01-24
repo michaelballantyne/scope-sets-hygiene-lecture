@@ -2,7 +2,7 @@
 
 (require "syntax.rkt")
 
-(provide meta-eval)
+(provide eval-transformer)
 
 (define (parse-and-lift stx ns)
   (match stx
@@ -17,7 +17,7 @@
     ['() '()]
     [e e]))
 
-(define (meta-eval stx)
+(define (eval-transformer stx)
   (define ns (make-base-namespace))
   (parameterize ([current-namespace ns])
     (namespace-require 'racket/match))
@@ -29,7 +29,7 @@
   (require rackunit)
 
   (define proc
-    (meta-eval
+    (eval-transformer
      (datum->syntax (identifier 'foo (set))
                     `(lambda (stx)
                        #'(hello world)))))
