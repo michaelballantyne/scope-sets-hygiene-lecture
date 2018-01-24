@@ -4,7 +4,14 @@
  (struct-out identifier)
  (struct-out binding)
  datum->syntax
- syntax->datum)
+ syntax->datum
+ empty-scopes
+ new-scope
+ add-scope
+ flip-scope
+ resolve)
+
+(define empty-scopes (set))
 
 (struct identifier (symbol scopes) #:transparent)
 (struct scope (id) #:transparent)
@@ -24,17 +31,28 @@
 
 (define (datum->syntax id datum)
   (define scopes (if id (identifier-scopes id) (set)))
-  (sexpr-map (lambda (sym) (identifier sym scopes)) datum))
+  (sexpr-map
+   (lambda (datum)
+     (if (symbol? datum)
+         (identifier datum scopes)
+         datum))
+   datum))
 
 (define (syntax->datum stx)
-  (sexpr-map identifier-symbol))
+  (sexpr-map
+   (lambda (stx)
+     (if (identifier? stx)
+         (identifier-symbol stx)
+         stx))
+   stx))
 
 (define (add-scope scope stx)
   (sexpr-map
    (lambda (id)
      (match id
        [(identifier sym scopes)
-        (identifier sym (set-add scopes scope))]))
+        (identifier sym (set-add scopes scope))]
+       [e e]))
    stx))
 
 (define (flip-scope scope stx)
@@ -44,19 +62,25 @@
        [(identifier sym scopes)
         (identifier sym (if (set-member? scopes scope)
                             (set-remove scopes scope)
-                            (set-add scopes scope)))]))
+                            (set-add scopes scope)))]
+       [e e]))
    stx))
 
-(struct binding (scopes symbol value))
+(struct binding (scopes symbol value) #:transparent)
 
-(define (resolve id binding-store)
+(define (resolve id binding-store)  
   (define ref-scopes (identifier-scopes id))
   (define ref-sym (identifier-symbol id))
-
-  (for/fold ([best #f])
-            ([next binding-store])
-    (if (and (subset? (binding-scopes next) ref-scopes)
-             (or (not best)
-                 (subset? (binding-scopes best) (binding-scopes next))))
-        next
-        candidate)))
+  
+  (define best-binding
+    (for/fold ([best #f])
+              ([next binding-store])
+      (if (and (equal? (binding-symbol next) ref-sym)
+               (subset? (binding-scopes next) ref-scopes)
+               (or (not best)
+                   (subset? (binding-scopes best) (binding-scopes next))))
+          next
+          best)))
+  
+  (and best-binding
+       (binding-value best-binding)))

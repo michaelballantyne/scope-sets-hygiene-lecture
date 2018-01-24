@@ -14,7 +14,8 @@
     [(cons a d)
      (cons (parse-and-lift a ns)
            (parse-and-lift d ns))]
-    ['() '()]))
+    ['() '()]
+    [e e]))
 
 (define (meta-eval stx)
   (define ns (make-base-namespace))
