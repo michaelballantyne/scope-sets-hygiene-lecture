@@ -4,7 +4,7 @@
 
 (provide ∃!/s)
 
-(define (∃!* . args0)
+(define (∃!* . args)
   ;; [Listof Any] Any -> Any
   ;; SEEN have we seen any non-#false value
   (define (aux args seen)

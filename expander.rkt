@@ -57,7 +57,6 @@ Expression is one of:
      (expander '((lambda (a) (if (zero? a) (lambda (x y) x) (lambda (x y) y))) 10))
      '((lambda (a) (if (zero? a) (lambda (x y) x) (lambda (x y) y))) 10))
 
-    ;; ******************************************************************
     (check-equal?
      (expander '(let ((a  10))
                   (if (zero? a) (lambda (x y) x) (lambda (x y) y))))
@@ -66,7 +65,6 @@ Expression is one of:
     (check-exn exn:fail? (lambda () (expander '(let ((a 10)) (lambda a a)))))
 
     (check-exn exn:fail? (lambda () (expander '(let ((10 a)) a))))
-    ;; ******************************************************************
 
     (check-exn exn:fail?
                (lambda ()

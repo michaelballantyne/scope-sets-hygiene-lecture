@@ -2,17 +2,14 @@
 
 (provide
  (struct-out identifier)
- (struct-out binding)
  datum->syntax
  syntax->datum
  (rename-out [scope new-scope])
  add-scope
- flip-scope
- resolve)
+ flip-scope)
 
 (struct scope ())
 (struct identifier (symbol scopes) #:transparent)
-(struct binding (scopes symbol value) #:transparent)
 
 (define (datum->syntax id datum)
   (define scopes (if id (identifier-scopes id) (set)))
@@ -50,23 +47,6 @@
                             (set-add scopes scope)))]
        [e e]))
    stx))
-
-(define (resolve id binding-store)  
-  (define ref-scopes (identifier-scopes id))
-  (define ref-sym (identifier-symbol id))
-  
-  (define best-binding
-    (for/fold ([best #f])
-              ([next binding-store])
-      (if (and (equal? (binding-symbol next) ref-sym)
-               (subset? (binding-scopes next) ref-scopes)
-               (or (not best)
-                   (subset? (binding-scopes best) (binding-scopes next))))
-          next
-          best)))
-  
-  (and best-binding
-       (binding-value best-binding)))
 
 (define (sexpr-map f sexpr)
   (match sexpr

@@ -1,3 +1,4 @@
+
 #lang racket 
 
 (require
@@ -10,6 +11,7 @@
 ;  - keywords
 ;  - primitive functions
 ;  - syntax transformers
+(struct binding (scopes symbol value) #:transparent)
 (define BINDING-STORE '())
 
 (define (add-binding! id val)
@@ -161,6 +163,23 @@
      (map expander s)]
     [else
      (error 'expander "not a valid Expression: ~e" s)]))
+
+(define (resolve id binding-store)  
+  (define ref-scopes (identifier-scopes id))
+  (define ref-sym (identifier-symbol id))
+  
+  (define best-binding
+    (for/fold ([best #f])
+              ([next binding-store])
+      (if (and (equal? (binding-symbol next) ref-sym)
+               (subset? (binding-scopes next) ref-scopes)
+               (or (not best)
+                   (subset? (binding-scopes best) (binding-scopes next))))
+          next
+          best)))
+  
+  (and best-binding
+       (binding-value best-binding)))
 
 (define (apply-transformer transformer stx)
   (let* ([introduction-scope (new-scope)]
