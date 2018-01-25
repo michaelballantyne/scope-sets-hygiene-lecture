@@ -15,6 +15,7 @@
      (cons (parse-and-lift a ns)
            (parse-and-lift d ns))]
     ['() '()]
+    [(? symbol?) (error 'eval-transformer "argument should be syntax, not s-expression")]
     [e e]))
 
 (define (eval-transformer stx)
