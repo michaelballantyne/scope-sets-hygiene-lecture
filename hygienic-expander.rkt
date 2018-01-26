@@ -16,7 +16,7 @@
 (define BINDING-STORE '())
 
 ; scopes is (Setof Scope)
-; value is a BindingValue, which is (or Symbol Procedure)
+; value is a BindingValue, which is one of Symbol or Procedure
 (struct binding (scopes symbol value) #:transparent)
 
 (define (add-binding! id val)
@@ -30,7 +30,7 @@
 (module+ test
   #;(expand-top 'a)
   
-  (expand-top '(lambda (a)
+  #;(expand-top '(lambda (a)
                  (if (zero? a)
                      1
                      5))))
@@ -41,7 +41,7 @@
 
 
 ; Primitive bindings
-(add-binding! (datum->syntax #f 'zero?) 'zero?)
+#;(add-binding! (datum->syntax #f 'zero?) 'zero?)
 
 
 (define (extend-syntax macro transformer-stx)
@@ -178,7 +178,7 @@
     [else
      (error 'expander "not a valid Expression: ~e" s)]))
 
-; Identifier, BindingStore -> (or #false BindingValue)
+; Identifier, BindingStore -> one of #false or BindingValue
 (define (resolve id binding-store)  
   (define ref-scopes (identifier-scopes id))
   (define ref-sym (identifier-symbol id))
