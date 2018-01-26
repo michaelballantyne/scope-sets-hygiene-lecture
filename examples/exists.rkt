@@ -13,7 +13,7 @@
       [else (define temp {(first args)})
             (if (and seen temp) #false (aux (rest args) (or temp seen)))]))
   ;; -- IN --
-  (aux args0 #false))
+  (aux args #false))
 
 (define-syntax (∃!/s stx)
   (syntax-parse stx

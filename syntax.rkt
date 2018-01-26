@@ -8,8 +8,17 @@
  add-scope
  flip-scope)
 
-(struct scope ())
 (struct identifier (symbol scopes) #:transparent)
+(struct scope ())
+; Syntax is one of: 
+;  -- Identifier 
+;  -- Number
+;  -- #false
+;  -- #true
+;  -- [Listof Syntax]
+;; Identifier is (identifier Symbol Scopes)
+;; Scopes is [Setof (scope)]
+
 
 (define (datum->syntax id datum)
   (define scopes (if id (identifier-scopes id) (set)))
