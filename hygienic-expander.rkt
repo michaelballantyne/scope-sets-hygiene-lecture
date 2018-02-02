@@ -1,4 +1,3 @@
-
 #lang racket 
 
 (require
@@ -28,9 +27,9 @@
 
 
 (module+ test
-  #;(expand-top 'a)
+  ;(expand-top 'a)
   
-  #;(expand-top '(lambda (a)
+  (expand-top '(lambda (a)
                  (if (zero? a)
                      1
                      5))))
@@ -41,7 +40,7 @@
 
 
 ; Primitive bindings
-#;(add-binding! (datum->syntax #f 'zero?) 'zero?)
+(add-binding! (datum->syntax #f 'zero?) 'zero?)
 
 
 (define (extend-syntax macro transformer-stx)
@@ -119,15 +118,16 @@
   (check-equal?
    
    (expand-top
-    '(let-syntax ([or (lambda (stx)
-                        (match stx
-                          [`(,_ ,e1 ,e2)
-                           `(,#'let ([,#'tmp ,e1])
-                                    (,#'if ,#'tmp
-                                           ,#'tmp
-                                           ,e2))]))])
-       (let ([tmp 2])
-         (or 1 tmp))))
+    '(let ([x 5])
+       (let-syntax ([or (lambda (stx)
+                          (match stx
+                            [`(,_ ,e1 ,e2)
+                             `(,#'let ([,#'tmp ,e1])
+                                      (,#'if ,#'tmp
+                                             ,#'tmp
+                                             ,e2))]))])
+         (let ([tmp 2])
+           (or 1 tmp)))))
    
    '((lambda (tmp1)
        ((lambda (tmp2)
@@ -163,9 +163,10 @@
      `(lambda ,new-params
         ,(expander (add-scope scope body)))]
     [`(,(identifier 'let-syntax _) ([,macro ,transformer-stx]) ,body)
-     (let ([scope (new-scope)])
-       (add-binding! (add-scope scope macro) (eval-transformer transformer-stx))
-       (expander (add-scope scope body)))]
+     [define scope (new-scope)]
+     (add-binding! (add-scope scope macro)
+                   (eval-transformer transformer-stx))
+     (expander (add-scope scope body))]
     [(cons (? identifier? id) _)
      (match (resolve id BINDING-STORE)
        [#f (error 'expander "unbound identifier: ~a" id)]
@@ -189,7 +190,8 @@
                #:when (and (equal? (binding-symbol next) ref-sym)
                            (subset? (binding-scopes next) ref-scopes))
                #:when (or (not best)
-                          (subset? (binding-scopes best) (binding-scopes next))))
+                          (subset? (binding-scopes best)
+                                   (binding-scopes next))))
       next))
   
   (and best-binding
